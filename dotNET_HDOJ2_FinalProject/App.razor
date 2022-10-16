@@ -1,0 +1,15 @@
+﻿<BootstrapBlazorRoot>
+    <Router AppAssembly="@typeof(App).Assembly">
+        <Found Context="routeData">
+            <PageTitle>Title</PageTitle>
+            <RouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)" />
+            <FocusOnNavigate RouteData="@routeData" Selector="h1" />
+        </Found>
+        <NotFound>
+            <PageTitle>Not found</PageTitle>
+            <LayoutView Layout="@typeof(MainLayout)">
+                <p>您访问的页面并不存在 ...</p>
+            </LayoutView>
+        </NotFound>
+    </Router>
+</BootstrapBlazorRoot>

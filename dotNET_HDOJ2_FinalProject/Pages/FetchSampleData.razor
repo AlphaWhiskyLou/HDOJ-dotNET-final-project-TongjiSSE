@@ -1,0 +1,75 @@
+﻿@page "/fetchsampledata"
+
+<PageTitle>Sample Data Management</PageTitle>
+
+@using DataModels.Models
+@inject AdminService.AdminSampleService sampleDataService
+
+<h1>用例信息管理</h1>
+
+<p>您可在此页面对题目用例信息进行管理</p>
+
+@if (samples == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <Table TItem="Sample" Items="@samples" 
+        IsBordered="true" 
+        ShowToolbar="true" 
+        IsMultipleSelect="true" 
+        OnSaveAsync="@OnSaveAsync" 
+        OnDeleteAsync="@OnDeleteAsync" 
+        ShowRefresh="false"
+        EditButtonText="编辑用例"
+        AddButtonText="增加用例"
+        DeleteButtonText="删除用例"
+    >
+    <TableColumns>
+        <TableColumn @bind-Field="@context.QuestionId" Width="180" Filterable="true" Sortable="true" DefaultSort="true" DefaultSortOrder="@SortOrder.Desc"/>
+        <TableColumn @bind-Field="@context.Input" Filterable="true" Sortable="true" />
+        <TableColumn @bind-Field="@context.IsTest" Filterable="true" Sortable="true"/>
+        <TableColumn @bind-Field="@context.Output" Filterable="true" Sortable="true"/>
+    </TableColumns>
+</Table>
+
+
+}
+
+@code {
+    private List<Sample>? samples;
+
+    protected override async Task OnInitializedAsync()
+    {
+        samples = await sampleDataService.GetSampleInfo();
+    }
+
+    protected async  Task<bool> OnSaveAsync(Sample sample, ItemChangedType itemChangedType)
+    {
+        bool res = true ;
+        if(itemChangedType == ItemChangedType.Update)
+        {
+            res = await sampleDataService.UpdateSample(sample);
+        }
+        else if(itemChangedType == ItemChangedType.Add)
+        {
+            res = await sampleDataService.AddSample(sample);
+        }
+
+        return res;
+    }
+
+    protected async Task<bool> OnDeleteAsync(IEnumerable<Sample> samples)
+    {
+        bool res = true;
+
+        foreach(var sample in samples.ToList())
+        {
+            res = await sampleDataService.DeleteQuestion(sample); 
+        }
+
+        return res;
+    }
+
+}

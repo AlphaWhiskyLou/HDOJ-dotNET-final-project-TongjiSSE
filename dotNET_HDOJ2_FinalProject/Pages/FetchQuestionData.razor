@@ -1,0 +1,81 @@
+﻿@page "/fetchquestiondata"
+
+<PageTitle>Question Data Management</PageTitle>
+
+@using DataModels.Models
+@inject AdminService.AdminQuestionService questionDataService
+
+<h1>题目信息管理</h1>
+
+<p>您可在此页面对题目信息进行管理</p>
+
+@if (questions == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+
+    <Table TItem="Question" Items="@questions" 
+        IsBordered="true" 
+        ShowToolbar="true" 
+        IsMultipleSelect="true" 
+        OnSaveAsync="@OnSaveAsync" 
+        OnDeleteAsync="@OnDeleteAsync" 
+        OnAfterSaveAsync="@AfterSaveAsync"
+        ShowRefresh="false"
+        EditButtonText="编辑题目"
+        AddButtonText="增加题目"
+        DeleteButtonText="删除题目"
+    >
+    <TableColumns>
+        <TableColumn @bind-Field="@context.QuestionId" Width="180" Filterable="true" Sortable="true"/>
+        <TableColumn @bind-Field="@context.Description" Filterable="true" Sortable="true"/>
+        <TableColumn @bind-Field="@context.Labels" Filterable="true" Sortable="true"/>
+        <TableColumn @bind-Field="@context.Difficulty" Filterable="true" Sortable="true"/>
+    </TableColumns>
+</Table>
+
+
+}
+
+@code {
+    private List<Question>? questions;
+
+    protected override async Task OnInitializedAsync()
+    {
+        questions = await questionDataService.GetQuestionInfo();
+    }
+
+    protected async  Task<bool> OnSaveAsync(Question question, ItemChangedType itemChangedType)
+    {
+        bool res = true ;
+        if(itemChangedType == ItemChangedType.Update)
+        {
+            res = await questionDataService.UpdateQuestion(question);
+        }
+        else if(itemChangedType == ItemChangedType.Add)
+        {
+            res = await questionDataService.AddQuestion(question);
+        }
+
+        return res;
+    }
+
+    protected async Task<bool> OnDeleteAsync(IEnumerable<Question> questions)
+    {
+        bool res = true;
+
+        foreach(var question in questions.ToList())
+        {
+            res = await questionDataService.DeleteQuestion(question); 
+        }
+
+        return res;
+    }
+
+    protected async Task AfterSaveAsync(Question question)
+    {
+        questions = await questionDataService.GetQuestionInfo();
+    }
+}

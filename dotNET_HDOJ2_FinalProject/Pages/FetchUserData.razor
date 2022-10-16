@@ -1,0 +1,80 @@
+﻿@page "/fetchuserdata"
+
+<PageTitle>User Data Management</PageTitle>
+
+@using DataModels.Models
+@inject AdminService.AdminUserService userDataService
+
+<h1>用户信息管理</h1>
+
+<p>您可在此页面对用户信息进行管理</p>
+
+@if (users == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    
+    <Table TItem="User" Items="@users" 
+        IsBordered="true" 
+        ShowToolbar="true" 
+        IsMultipleSelect="true" 
+        OnSaveAsync="@OnSaveAsync" 
+        OnDeleteAsync="@OnDeleteAsync" 
+        OnAfterSaveAsync="@AfterSaveAsync"
+        ShowAddButton='false'
+        ShowRefresh="false"
+        EditButtonText="编辑用户"
+        DeleteButtonText="删除用户"
+    >
+    <TableColumns>
+        <TableColumn @bind-Field="@context.UserId" Width="180" Filterable="true" Sortable="true"/>
+        <TableColumn @bind-Field="@context.Username" Filterable="true" Sortable="true"/>
+        <TableColumn @bind-Field="@context.Type" Filterable="true" Sortable="true"/>
+        <TableColumn @bind-Field="@context.University" Filterable="true" Sortable="true"/>
+    </TableColumns>
+</Table>
+}
+
+@code {
+    private List<User>? users;
+
+    protected override async Task OnInitializedAsync()
+    {
+        users = await userDataService.GetUserInfo();
+    }
+
+    protected async  Task<bool> OnSaveAsync(User user, ItemChangedType itemChangedType)
+    {
+        bool res = true ;
+        if(itemChangedType == ItemChangedType.Update)
+        {
+             res = await userDataService.UpdateUser(user);
+        }
+        else if(itemChangedType == ItemChangedType.Add)
+        {
+            res = await userDataService.UpdateUser(user);
+        }
+
+        return res;
+    }
+
+    protected async Task<bool> OnDeleteAsync(IEnumerable<User> questions)
+    {
+        bool res = true;
+
+        foreach(var user in users.ToList())
+        {
+           res = await userDataService.DeleteUser(user);
+        }
+
+        return res;
+    }
+
+    protected async Task AfterSaveAsync(User user)
+    {
+        
+    }
+}
+
